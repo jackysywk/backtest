@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"time"
 )
 
 // FileExists checks if a file exists and is not a directory.
@@ -18,18 +19,22 @@ func FileExists(filename string) bool {
 	return !info.IsDir()
 }
 
-func Getdata_hkfdb(ticker string) (map[string]map[string]float64, error) {
-
+func Getdata_hkfdb(ticker string, start time.Time, end time.Time) (map[string]map[string]float64, error) {
+	start_string := start.Format("20060102")
+	end_string := end.Format("20060102")
 	filename := fmt.Sprintf("data/%s.csv", ticker)
 	if !FileExists(filename) {
-		cmd := exec.Command("python", "get_data.py", ticker)
+		fmt.Println("Downloading ticker data using python")
+		cmd := exec.Command("python", "get_data.py", ticker, start_string, end_string)
 		err := cmd.Run()
 		if err != nil {
 			log.Fatalf("Failed to execute command: %s", err)
 		}
+	} else {
+		fmt.Println("Using cache file.")
 	}
 	data := make(map[string]map[string]float64)
-	file, err := os.Open("data/00388.csv")
+	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -8,6 +8,15 @@ def get_hist_data(token, ticker, start=20220101, end=20230831, interval='1D'):
     client = hkfdb.Database(token)
     print("Downloading Data:",ticker)
     df = client.get_hk_stock_ohlc(ticker,start, end,interval,price_adj=True, vol_adj=True)
+    df = df.rename(columns={
+        'date':'Date',
+        'time':'Time',
+        'open':'Open',
+        'high':'High',
+        'low:':'Low',
+        'close':'Close',
+        'volume':'Volume'
+    })
     df.to_csv(r'data/%s.csv'%ticker, encoding='utf-8')
 
 if __name__ == "__main__":
@@ -21,5 +30,5 @@ if __name__ == "__main__":
         start_date = sys.argv[2] if len(sys.argv) > 2 else 20220101
         end_date = sys.argv[3] if len(sys.argv) > 3 else 20230831
         interval = sys.argv[4] if len(sys.argv) > 4 else '1D'
-        
-        get_hist_data(token, ticker, start_date, end_date, interval)
+        print(ticker, start_date, end_date, interval)
+        get_hist_data(token, ticker, int(start_date), int(end_date), interval)
