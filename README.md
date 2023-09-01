@@ -1,3 +1,5 @@
 # backtest
 
-This is a golang library to do backtesting
+## The 2nd commit
+
+Add data source of HKFDB.  excluding input data parameter to hkfdb.
