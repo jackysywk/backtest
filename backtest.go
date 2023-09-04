@@ -29,13 +29,18 @@ func backtest(data map[string]map[string]float64, account Account, params Params
 		now_candle := now_close - now_open
 
 		// Calculate the equity
-		account.unrealized_pnl = account.num_of_share * (now_close - account.open_price)
+		account.unrealized_pnl = account.num_of_share*(now_close-account.open_price) - commission(account.open_price*account.num_of_share)
 		account.equity_value = account.capital + account.unrealized_pnl
 		account.net_profit = account.equity_value - account.initial_capital
-
-		trade_logic := now_candle > params.candle_len
-
+		trade_logic := false
+		if params.candle_dir == "positive" {
+			trade_logic = now_candle > params.candle_len
+		} else if params.candle_dir == "negative" {
+			trade_logic = now_candle < -1*params.candle_len
+		}
+		min_cost_cond := account.capital > (now_close * account.lot_size)
 		//fmt.Printf("%v, %v\n", now_date_string, now_close)
+
 		close_logic := now_date.Sub(open_date).Hours()/24 >= params.holding_day
 		profit_target_cond := (now_close-account.open_price)/account.open_price > params.profit_target
 		stop_loss_cond := (account.open_price-now_close)/account.open_price > params.stop_loss
@@ -43,7 +48,7 @@ func backtest(data map[string]map[string]float64, account Account, params Params
 		//fmt.Printf("%v, Trade Logic:%v, Close Logic: %v, Profit: %v, Stop: %v\n", now_date, trade_logic, close_logic, profit_target_cond, stop_loss_cond)
 
 		// Open Position
-		if account.num_of_share == 0 && trade_logic {
+		if account.num_of_share == 0 && min_cost_cond && trade_logic && !last_index_cond {
 			account.num_of_share = get_buyable_share(account.capital, now_close, account.lot_size)
 			account.open_price = now_close
 			open_date = now_date

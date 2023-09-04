@@ -20,6 +20,7 @@ type Account struct {
 
 type Params struct {
 	candle_len    float64
+	candle_dir    string
 	profit_target float64
 	stop_loss     float64
 	holding_day   float64
@@ -29,7 +30,7 @@ func main() {
 
 	// Get Data from API
 	now := time.Now()
-	start := now.AddDate(-1, 0, 0)
+	start := now.AddDate(-4, 0, 0)
 	symbol := "00388"
 	data, err := Getdata_hkfdb(symbol, start, now)
 	//data, err := Getdata_yf(symbol, start, now)
@@ -51,10 +52,11 @@ func main() {
 	}
 	//Initialize the Parameter
 	params := Params{
-		candle_len:    1,
+		candle_len:    5,
+		candle_dir:    "negative",
 		profit_target: 0.05,
-		stop_loss:     0.2,
-		holding_day:   3,
+		stop_loss:     0.05,
+		holding_day:   10,
 	}
 
 	backtest(data, account, params)
